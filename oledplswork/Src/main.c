@@ -20,13 +20,10 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "fonts.h"
-#include <stdlib.h>
-#include <stdio.h>
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "fonts.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -60,9 +57,10 @@ static void MX_SPI2_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-void sendCMD(uint8_t *cmd, uint16_t size);
-void sendDATA(uint8_t *data, uint16_t size);
-void sendString(char *string, uint8_t header);
+//void sendCMD(uint8_t *cmd, uint16_t size);
+//void sendDATA(uint8_t *data, uint16_t size);
+//void sendString(char *string, uint8_t header);
+//void clearScreen();
 
 // buffer
 
@@ -72,12 +70,14 @@ void sendString(char *string, uint8_t header);
 //display on send cmd 0xAF
 
 
-uint8_t turnOn[] = {0xA8, 0x3F, 0xD3, 0x00, 0x20,0x01, 0xAF};// 0xAF}; //need to change
+uint8_t turnOn[] = {0xA8, 0x3F, 0xD3, 0x00, 0x20,0x10, 0xAF};// 0xAF}; //need to change
 uint8_t orientation[]={0xC8, 0xA1};
 
 uint8_t turnOff[]={0xAE};
 //const uint8_t A[] = {0x7E, 0x09, 0x09, 0x09, 0x7E,0x00};
-
+uint8_t dim[] = {0xAC, 0xAB};
+//uint8_t contrastLow[]={0x81, 0x0F};
+//uint8_t contrastHigh[]={0x81, 0xFF};
 //testing
 /* USER CODE END 0 */
 
@@ -120,9 +120,15 @@ int main(void)
   //sendCMD(turnOn2,(uint16_t)sizeof(turnOn));
 
   // clear screen
-  for (int i=0; i<1024; i++){
-	  sendDATA(space, (uint16_t)sizeof(space));
-  }
+  clearScreen();
+
+  //show screeen for x amount of time
+
+  sendDATA(MARSBMP, (uint16_t)sizeof(MARSBMP));
+  //wait x amount of time
+
+
+ // clearScreen();
   /* USER CODE END 2 */
  
  
@@ -132,33 +138,63 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
+
     /* USER CODE BEGIN 3 */
 	  //set page
 	  //set colo
-	  uint8_t page[] = {0x22, 0x00,0x00};
+	  //wait indef time
+
+/*
+	 uint8_t page[] = {0x22, 0x00,0x00};
 	  uint8_t col[]= {0x21, 0x00, 0x7F};
-	  char*message = "HEADER PLACEHOLDER*";
+	  char* message = "126@* 100%        FIX";
 
-	  sendCMD(page,(uint16_t)sizeof(page));
-
-	  sendCMD(col, (uint16_t)sizeof(col));
-	  sendString(message,0x80);
-
-	  page[1]=0x01;
-	  page[2]=0x01;
-	  message = "NAME:  HR  BAT  GPS";
 	  sendCMD(page,(uint16_t)sizeof(page));
 
 	  sendCMD(col, (uint16_t)sizeof(col));
 	  sendString(message,0x00);
 
+	  page[1]=0x01;
+	  page[2]=0x01;
+	  message = "                     ";
+
+	  sendCMD(page,(uint16_t)sizeof(page));
+
+	  sendCMD(col, (uint16_t)sizeof(col));
+	  sendString(message,0x01);
+
 	  page[1]=0x02;
 	  page[2]=0x02;
-	  message = "LUCAS 175 100% N1000M";
+	  message = "N. ARMSTRONG:";
+	  sendCMD(page,(uint16_t)sizeof(page));
+
+	  sendCMD(col, (uint16_t)sizeof(col));
+	  sendString(message,0x00);
+
+	  page[1]=0x03;
+	  page[2]=0x03;
+	  message = "84  98% N96M";
+
+	  sendCMD(page,(uint16_t)sizeof(page));
+
+	  sendCMD(col, (uint16_t)sizeof(col));
+	  sendString(message,0x00);
+	  page[1]=0x05;
+	  page[2]=0x05;
+	  message = "M. MURPHY:";
 	  sendCMD(col, (uint16_t)sizeof(col));
 
 	  sendCMD(page,(uint16_t)sizeof(page));
 	  sendString(message, 0x00);
+	  message="175 100% SW55M";
+	  page[1]=0x06;
+	  page[2]=0x06;
+
+	  sendCMD(col, (uint16_t)sizeof(col));
+
+	  sendCMD(page,(uint16_t)sizeof(page));
+	  sendString(message, 0x00);
+*/
 
 
   }
@@ -251,14 +287,20 @@ static void MX_GPIO_Init(void)
   GPIO_InitTypeDef GPIO_InitStruct = {0};
 
   /* GPIO Ports Clock Enable */
-  __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, oled_NSS_Pin|ole_RES_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(oled_DC_GPIO_Port, oled_DC_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin : dim_Pin */
+  GPIO_InitStruct.Pin = dim_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(dim_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : oled_NSS_Pin ole_RES_Pin */
   GPIO_InitStruct.Pin = oled_NSS_Pin|ole_RES_Pin;
@@ -273,6 +315,10 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(oled_DC_GPIO_Port, &GPIO_InitStruct);
+
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI0_1_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI0_1_IRQn);
 
 }
 
@@ -309,6 +355,11 @@ void sendDATA(uint8_t *data, uint16_t size) {
 	//HAL_GPIO_WritePin(oled_DC_GPIO_Port, oled_DC_Pin, GPIO_PIN_RESET);
 }
 
+void clearScreen(){
+	for (int i=0; i<1024; i++){
+		  sendDATA(space, (uint16_t)sizeof(space));
+	  }
+}
 
 void sendString(char *string, uint8_t header){
 	for(int i =0; string[i]!='\0'; i++){
@@ -332,9 +383,18 @@ void sendString(char *string, uint8_t header){
 				wordSize = 2;
 
 			}
+			else if(string[i]=='.'){
+				letter[j]=fonts[39*6+2+j];
+				wordSize = 2;
+
+			}
 			else if(string[i]==' '){
 				letter[j] = fonts[38*6+j];
 				//wordSize=2;
+			}
+			else if(string[i]=='@'){
+				letter[j] = fonts[38*6+j];
+				wordSize=2;
 			}
 			else if(string[i]=='*'){
 				letter[j] = fonts[37*6+j];
@@ -344,6 +404,8 @@ void sendString(char *string, uint8_t header){
 		sendDATA(letter, wordSize);
 	}
 }
+
+
 /* USER CODE END 4 */
 
 /**

@@ -42,7 +42,10 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
+	uint8_t isDim = 0;
 
+	uint8_t contrastLow[]={0x81, 0x0F};
+	uint8_t contrastHigh[]={0x81, 0xFF};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -138,6 +141,29 @@ void SysTick_Handler(void)
 /* For the available peripheral interrupt handler names,                      */
 /* please refer to the startup file (startup_stm32l0xx.s).                    */
 /******************************************************************************/
+
+/**
+  * @brief This function handles EXTI line 0 and line 1 interrupts.
+  */
+void EXTI0_1_IRQHandler(void)
+{
+  /* USER CODE BEGIN EXTI0_1_IRQn 0 */
+	if(isDim){
+
+		sendCMD(contrastHigh, (uint16_t)sizeof(contrastHigh));
+		isDim = 0;
+	}
+	else{
+
+		  sendCMD(contrastLow, (uint16_t)sizeof(contrastLow));
+		  isDim=1;
+	}
+  /* USER CODE END EXTI0_1_IRQn 0 */
+  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_0);
+  /* USER CODE BEGIN EXTI0_1_IRQn 1 */
+
+  /* USER CODE END EXTI0_1_IRQn 1 */
+}
 
 /* USER CODE BEGIN 1 */
 

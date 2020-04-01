@@ -1,6 +1,7 @@
-main.c:172:6:SystemClock_Config	88	static
-main.c:280:6:sendCMD	24	static
-main.c:294:6:sendDATA	24	static
-main.c:313:6:sendString	48	static
+main.c:208:6:SystemClock_Config	88	static
+main.c:326:6:sendCMD	24	static
+main.c:340:6:sendDATA	24	static
+main.c:358:6:clearScreen	8	static
 main.c:88:5:main	56	static
-main.c:353:6:Error_Handler	0	static
+main.c:364:6:sendString	56	static
+main.c:415:6:Error_Handler	0	static

@@ -55,9 +55,17 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
 
+void sendCMD(uint8_t *cmd, uint16_t size);
+void sendDATA(uint8_t *data, uint16_t size);
+void sendString(char *string, uint8_t header);
+void clearScreen();
+
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define dim_Pin GPIO_PIN_0
+#define dim_GPIO_Port GPIOA
+#define dim_EXTI_IRQn EXTI0_1_IRQn
 #define oled_NSS_Pin GPIO_PIN_12
 #define oled_NSS_GPIO_Port GPIOB
 #define ole_RES_Pin GPIO_PIN_14
