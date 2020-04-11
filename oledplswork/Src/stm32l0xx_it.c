@@ -43,9 +43,14 @@
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
 	uint8_t isDim = 0;
-
+	uint8_t isSelfSetup = 1;
+	uint8_t isOtherSetup = 1;
 	uint8_t contrastLow[]={0x81, 0x0F};
 	uint8_t contrastHigh[]={0x81, 0xFF};
+	char hr[]="000";
+	char spo2[] = {'0','0','0'};
+	char distance[]="N000";
+	char user[]={'1'};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -59,7 +64,7 @@
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
-
+extern TIM_HandleTypeDef htim2;
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -163,6 +168,120 @@ void EXTI0_1_IRQHandler(void)
   /* USER CODE BEGIN EXTI0_1_IRQn 1 */
 
   /* USER CODE END EXTI0_1_IRQn 1 */
+}
+
+/**
+  * @brief This function handles TIM2 global interrupt.
+  */
+void TIM2_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM2_IRQn 0 */
+
+	uint8_t page[] = {0x22, 0x00,0x00};
+
+	uint8_t col[]= {0x21, 0x00, 0x7F};
+
+
+	char* message = "                      ";
+
+	if(isSelfSetup){
+		clearScreen();
+		sendCMD(page,(uint16_t)sizeof(page));
+
+		sendCMD(col, (uint16_t)sizeof(col));
+		sendString(message,0x00);
+		col[1]=0x13;
+		col[2]=0x32;
+		message = "@* ";
+
+		sendCMD(page,(uint16_t)sizeof(page));
+
+		sendCMD(col, (uint16_t)sizeof(col));
+		sendString(message,0x00);
+
+		col[1]=0x33;
+		col[2]=0x39;
+		message = "%";
+
+		sendCMD(page,(uint16_t)sizeof(page));
+
+		sendCMD(col, (uint16_t)sizeof(col));
+		sendString(message,0x00);
+		isSelfSetup = 0;
+
+
+	}
+	if(isOtherSetup){
+		// user name
+
+		message = "TOTO ";
+		page[1]=0x02;
+		page[2]=0x02;
+
+		col[1]=0x00;
+		col[2]=0x7F;
+		sendCMD(page,(uint16_t)sizeof(page));
+
+		sendCMD(col, (uint16_t)sizeof(col));
+		sendString(message,0x00);
+
+		page[1]=0x03;
+		page[2]=0x03;
+		col[1]=0x13;
+		col[2]=0x20;
+		message = "@* ";
+		sendCMD(page,(uint16_t)sizeof(page));
+		sendCMD(col, (uint16_t)sizeof(col));
+		sendString(message,0x00);
+		col[1]=0x33;
+		col[2]=0x39;
+		message = "%";
+		sendCMD(page,(uint16_t)sizeof(page));
+		sendCMD(col, (uint16_t)sizeof(col));
+		sendString(message,0x00);
+
+		col[1]=0x5A;
+		col[2]=0x60;
+		message ="M";
+
+		sendCMD(page,(uint16_t)sizeof(page));
+		sendCMD(col, (uint16_t)sizeof(col));
+		sendString(message,0x00);
+		isSelfSetup = 0;
+	}
+	if(hr[2]=='9'){
+		if(hr[1]=='9'){
+			if (hr[0]=='9'){
+				hr[0]='0';
+			}
+			else{
+				hr[0]=hr[0]+1;
+			}
+			hr[1]='0';
+		}
+		else{
+			hr[1]=hr[1]+1;
+		}
+		hr[2]='0';
+	}
+	else{
+		hr[2]=hr[2]+1;
+	}
+
+	distance[1]=hr[0];
+	distance[2]=hr[1];
+	distance[3]=hr[2];
+	user[0]='1';
+	updateScreen(hr, hr, hr, user);
+	user[0]='2';
+	updateScreen(hr, hr, distance, user);
+	//sedns stuff
+
+  /* USER CODE END TIM2_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim2);
+  /* USER CODE BEGIN TIM2_IRQn 1 */
+
+  /* USER CODE END TIM2_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */

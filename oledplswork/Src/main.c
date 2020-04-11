@@ -24,6 +24,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "fonts.h"
+#include "string.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -43,6 +44,8 @@
 /* Private variables ---------------------------------------------------------*/
 SPI_HandleTypeDef hspi2;
 
+TIM_HandleTypeDef htim2;
+
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -51,6 +54,7 @@ SPI_HandleTypeDef hspi2;
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_SPI2_Init(void);
+static void MX_TIM2_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -70,7 +74,7 @@ static void MX_SPI2_Init(void);
 //display on send cmd 0xAF
 
 
-uint8_t turnOn[] = {0xA8, 0x3F, 0xD3, 0x00, 0x20,0x10, 0xAF};// 0xAF}; //need to change
+uint8_t turnOn[] = {0xA8, 0x3F, 0xD3, 0x00, 0x20,0x10, 0xAF, 0xAC};// 0xAF}; //need to change
 uint8_t orientation[]={0xC8, 0xA1};
 
 uint8_t turnOff[]={0xAE};
@@ -112,6 +116,7 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_SPI2_Init();
+  MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
 
   HAL_GPIO_WritePin(GPIOB, oled_NSS_Pin|ole_RES_Pin, GPIO_PIN_SET);
@@ -120,11 +125,12 @@ int main(void)
   //sendCMD(turnOn2,(uint16_t)sizeof(turnOn));
 
   // clear screen
-  clearScreen();
+  //clearScreen();
 
   //show screeen for x amount of time
 
   sendDATA(MARSBMP, (uint16_t)sizeof(MARSBMP));
+  HAL_TIM_Base_Start_IT(&htim2);
   //wait x amount of time
 
 
@@ -143,8 +149,8 @@ int main(void)
 	  //set page
 	  //set colo
 	  //wait indef time
-
 /*
+
 	 uint8_t page[] = {0x22, 0x00,0x00};
 	  uint8_t col[]= {0x21, 0x00, 0x7F};
 	  char* message = "126@* 100%        FIX";
@@ -173,7 +179,7 @@ int main(void)
 
 	  page[1]=0x03;
 	  page[2]=0x03;
-	  message = "84  98% N96M";
+	  message = "84@*  98% N96M";
 
 	  sendCMD(page,(uint16_t)sizeof(page));
 
@@ -186,7 +192,7 @@ int main(void)
 
 	  sendCMD(page,(uint16_t)sizeof(page));
 	  sendString(message, 0x00);
-	  message="175 100% SW55M";
+	  message="175@* 100% SW55M";
 	  page[1]=0x06;
 	  page[2]=0x06;
 
@@ -194,9 +200,9 @@ int main(void)
 
 	  sendCMD(page,(uint16_t)sizeof(page));
 	  sendString(message, 0x00);
+
+
 */
-
-
   }
   /* USER CODE END 3 */
 }
@@ -274,6 +280,51 @@ static void MX_SPI2_Init(void)
   /* USER CODE BEGIN SPI2_Init 2 */
 
   /* USER CODE END SPI2_Init 2 */
+
+}
+
+/**
+  * @brief TIM2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM2_Init(void)
+{
+
+  /* USER CODE BEGIN TIM2_Init 0 */
+
+  /* USER CODE END TIM2_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM2_Init 1 */
+
+  /* USER CODE END TIM2_Init 1 */
+  htim2.Instance = TIM2;
+  htim2.Init.Prescaler = 20096;
+  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim2.Init.Period = 100;
+  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim2, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM2_Init 2 */
+
+  /* USER CODE END TIM2_Init 2 */
 
 }
 
@@ -362,6 +413,7 @@ void clearScreen(){
 }
 
 void sendString(char *string, uint8_t header){
+
 	for(int i =0; string[i]!='\0'; i++){
 		uint8_t letter[6];
 		uint16_t wordSize = (uint16_t)sizeof(letter);
@@ -405,6 +457,51 @@ void sendString(char *string, uint8_t header){
 	}
 }
 
+void updateScreen(char* hr, char* spo2, char* distance, char* user){
+
+	uint8_t page[] = {0x22, 0x00,0x00};
+
+	uint8_t col[]= {0x21, 0x00, 0x7F};
+
+	//hr col is 0-18
+	//spo2 col is - 33-51
+	//distance col is for
+	if(user[0]=='1'){
+		page[1]=0x00;
+		page[2]=0x00;
+		col[1]=0x00;
+		col[2]=0x12;
+		sendCMD(page,(uint16_t)sizeof(page));
+		sendCMD(col, (uint16_t)sizeof(col));
+		sendString(hr,0x00);
+		col[1]=0x21;
+		col[2]=0x32;
+		sendCMD(page,(uint16_t)sizeof(page));
+
+		sendCMD(col, (uint16_t)sizeof(col));
+		sendString(spo2,0x00);
+
+
+	}
+	if(user[0]=='2'){
+
+		page[1]=0x03;
+		page[2]=0x03;
+		col[1]=0x00;
+		col[2]=0x12;
+		sendCMD(page,(uint16_t)sizeof(page));
+		sendCMD(col, (uint16_t)sizeof(col));
+		sendString(hr,0x00);
+		col[1]=0x21;
+		col[2]=0x32;
+		sendCMD(col, (uint16_t)sizeof(col));
+		sendString(spo2,0x00);
+		col[1]=0x41;
+		col[2]=0x59;
+		sendCMD(col, (uint16_t)sizeof(col));
+		sendString(distance,0x00);
+	}
+}
 
 /* USER CODE END 4 */
 
