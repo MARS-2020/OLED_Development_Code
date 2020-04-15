@@ -23,8 +23,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "fonts.h"
-#include "string.h"
+#include "oled.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -74,15 +73,10 @@ static void MX_TIM2_Init(void);
 //display on send cmd 0xAF
 
 
-uint8_t turnOn[] = {0xA8, 0x3F, 0xD3, 0x00, 0x20,0x10, 0xAF, 0xAC};// 0xAF}; //need to change
-uint8_t orientation[]={0xC8, 0xA1};
 
-uint8_t turnOff[]={0xAE};
-//const uint8_t A[] = {0x7E, 0x09, 0x09, 0x09, 0x7E,0x00};
-uint8_t dim[] = {0xAC, 0xAB};
-//uint8_t contrastLow[]={0x81, 0x0F};
-//uint8_t contrastHigh[]={0x81, 0xFF};
-//testing
+
+
+uint8_t isDim = 0;
 /* USER CODE END 0 */
 
 /**
@@ -118,23 +112,10 @@ int main(void)
   MX_SPI2_Init();
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
+  turnOn();
 
-  HAL_GPIO_WritePin(GPIOB, oled_NSS_Pin|ole_RES_Pin, GPIO_PIN_SET);
-  sendCMD(turnOn, (uint16_t)sizeof(turnOn));
-  sendCMD(orientation, (uint16_t)sizeof(orientation));
-  //sendCMD(turnOn2,(uint16_t)sizeof(turnOn));
-
-  // clear screen
-  //clearScreen();
-
-  //show screeen for x amount of time
-
-  sendDATA(MARSBMP, (uint16_t)sizeof(MARSBMP));
   HAL_TIM_Base_Start_IT(&htim2);
-  //wait x amount of time
 
-
- // clearScreen();
   /* USER CODE END 2 */
  
  
@@ -146,63 +127,8 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  //set page
-	  //set colo
-	  //wait indef time
-/*
-
-	 uint8_t page[] = {0x22, 0x00,0x00};
-	  uint8_t col[]= {0x21, 0x00, 0x7F};
-	  char* message = "126@* 100%        FIX";
-
-	  sendCMD(page,(uint16_t)sizeof(page));
-
-	  sendCMD(col, (uint16_t)sizeof(col));
-	  sendString(message,0x00);
-
-	  page[1]=0x01;
-	  page[2]=0x01;
-	  message = "                     ";
-
-	  sendCMD(page,(uint16_t)sizeof(page));
-
-	  sendCMD(col, (uint16_t)sizeof(col));
-	  sendString(message,0x01);
-
-	  page[1]=0x02;
-	  page[2]=0x02;
-	  message = "N. ARMSTRONG:";
-	  sendCMD(page,(uint16_t)sizeof(page));
-
-	  sendCMD(col, (uint16_t)sizeof(col));
-	  sendString(message,0x00);
-
-	  page[1]=0x03;
-	  page[2]=0x03;
-	  message = "84@*  98% N96M";
-
-	  sendCMD(page,(uint16_t)sizeof(page));
-
-	  sendCMD(col, (uint16_t)sizeof(col));
-	  sendString(message,0x00);
-	  page[1]=0x05;
-	  page[2]=0x05;
-	  message = "M. MURPHY:";
-	  sendCMD(col, (uint16_t)sizeof(col));
-
-	  sendCMD(page,(uint16_t)sizeof(page));
-	  sendString(message, 0x00);
-	  message="175@* 100% SW55M";
-	  page[1]=0x06;
-	  page[2]=0x06;
-
-	  sendCMD(col, (uint16_t)sizeof(col));
-
-	  sendCMD(page,(uint16_t)sizeof(page));
-	  sendString(message, 0x00);
 
 
-*/
   }
   /* USER CODE END 3 */
 }
@@ -374,133 +300,17 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-void sendCMD(uint8_t *cmd, uint16_t size) {
-	//set dc low
-	HAL_GPIO_WritePin(oled_DC_GPIO_Port,  oled_DC_Pin, GPIO_PIN_RESET);
-	//set CS low
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
+	if(isDim){
 
-	HAL_GPIO_WritePin(oled_NSS_GPIO_Port,  oled_NSS_Pin, GPIO_PIN_RESET);
-	//send cmd
-	HAL_SPI_Transmit(&hspi2, cmd, size, 1000);
-	//set CS high
-
-	HAL_GPIO_WritePin(oled_NSS_GPIO_Port,  oled_NSS_Pin, GPIO_PIN_SET);
-
-}
-
-void sendDATA(uint8_t *data, uint16_t size) {
-	//send and go through buffer
-	//set dc high
-
-	HAL_GPIO_WritePin(oled_DC_GPIO_Port, oled_DC_Pin, GPIO_PIN_SET);
-	//set CS low
-
-	HAL_GPIO_WritePin(oled_NSS_GPIO_Port,  oled_NSS_Pin, GPIO_PIN_RESET);
-	//sendData
-	//for(int i=0; i<dataSize;i++);
-	HAL_SPI_Transmit(&hspi2, data, size, 1000);
-	//set CS high
-	HAL_GPIO_WritePin(oled_NSS_GPIO_Port,  oled_NSS_Pin, GPIO_PIN_SET);
-	//set dc high
-
-	//HAL_GPIO_WritePin(oled_DC_GPIO_Port, oled_DC_Pin, GPIO_PIN_RESET);
-}
-
-void clearScreen(){
-	for (int i=0; i<1024; i++){
-		  sendDATA(space, (uint16_t)sizeof(space));
-	  }
-}
-
-void sendString(char *string, uint8_t header){
-
-	for(int i =0; string[i]!='\0'; i++){
-		uint8_t letter[6];
-		uint16_t wordSize = (uint16_t)sizeof(letter);
-		//IF STRING I LETTER
-
-		for(int j =0; j<6; j++){
-			wordSize = (uint16_t)sizeof(letter);
-			if (string[i]>='A' && string[i] <= 'Z'){
-				letter[j] = fonts[(string[i]-'A')*6+j];
-			}
-			else if(string[i] >= '0' && string[i] <= '9'){
-				letter[j] = fonts[(string[i]-'0'+26)*6+j];
-			}
-			else if(string[i]=='%'){
-				letter[j] = fonts[36*6+j];
-			}
-			else if(string[i]==':'){
-				letter[j]=fonts[39*6+j];
-				wordSize = 2;
-
-			}
-			else if(string[i]=='.'){
-				letter[j]=fonts[39*6+2+j];
-				wordSize = 2;
-
-			}
-			else if(string[i]==' '){
-				letter[j] = fonts[38*6+j];
-				//wordSize=2;
-			}
-			else if(string[i]=='@'){
-				letter[j] = fonts[38*6+j];
-				wordSize=2;
-			}
-			else if(string[i]=='*'){
-				letter[j] = fonts[37*6+j];
-			}
-			letter[j]=letter[j]|header;
+			sendCMD(contrastHigh, (uint16_t)sizeof(contrastHigh));
+			isDim = 0;
 		}
-		sendDATA(letter, wordSize);
-	}
-}
+	else{
 
-void updateScreen(char* hr, char* spo2, char* distance, char* user){
-
-	uint8_t page[] = {0x22, 0x00,0x00};
-
-	uint8_t col[]= {0x21, 0x00, 0x7F};
-
-	//hr col is 0-18
-	//spo2 col is - 33-51
-	//distance col is for
-	if(user[0]=='1'){
-		page[1]=0x00;
-		page[2]=0x00;
-		col[1]=0x00;
-		col[2]=0x12;
-		sendCMD(page,(uint16_t)sizeof(page));
-		sendCMD(col, (uint16_t)sizeof(col));
-		sendString(hr,0x00);
-		col[1]=0x21;
-		col[2]=0x32;
-		sendCMD(page,(uint16_t)sizeof(page));
-
-		sendCMD(col, (uint16_t)sizeof(col));
-		sendString(spo2,0x00);
-
-
-	}
-	if(user[0]=='2'){
-
-		page[1]=0x03;
-		page[2]=0x03;
-		col[1]=0x00;
-		col[2]=0x12;
-		sendCMD(page,(uint16_t)sizeof(page));
-		sendCMD(col, (uint16_t)sizeof(col));
-		sendString(hr,0x00);
-		col[1]=0x21;
-		col[2]=0x32;
-		sendCMD(col, (uint16_t)sizeof(col));
-		sendString(spo2,0x00);
-		col[1]=0x41;
-		col[2]=0x59;
-		sendCMD(col, (uint16_t)sizeof(col));
-		sendString(distance,0x00);
-	}
+			 sendCMD(contrastLow, (uint16_t)sizeof(contrastLow));
+			 isDim=1;
+		}
 }
 
 /* USER CODE END 4 */
