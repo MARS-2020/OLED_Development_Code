@@ -60,21 +60,10 @@ static void MX_TIM2_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-//void sendCMD(uint8_t *cmd, uint16_t size);
-//void sendDATA(uint8_t *data, uint16_t size);
-//void sendString(char *string, uint8_t header);
-//void clearScreen();
-
-// buffer
-
-//multiplex ratio (#lines active on screen) send cmd 0xA8 to state and then 0x3F to say that we want to use all 64 rows
-//display offset. send cmd 0xD3 to state and then 0x__ to set
-//adressing mode send cmd 0x20 then send 0x01 for horizontal adressing (page numbers automatically incerase) send 0x10 for line by line dressign (have to set page and col numbers)
-//display on send cmd 0xAF
 
 
-
-
+uint8_t contrastLow[]={0x81, 0x0F};
+uint8_t contrastHigh[]={0x81, 0xFF};
 
 uint8_t isDim = 0;
 /* USER CODE END 0 */
@@ -86,7 +75,6 @@ uint8_t isDim = 0;
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
   /* USER CODE END 1 */
   
 
@@ -103,7 +91,6 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
-//turn on screen
 
   /* USER CODE END SysInit */
 
@@ -112,10 +99,10 @@ int main(void)
   MX_SPI2_Init();
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
-  turnOn();
 
+
+  turnOnScreen();
   HAL_TIM_Base_Start_IT(&htim2);
-
   /* USER CODE END 2 */
  
  

@@ -1,9 +1,18 @@
+/*
+ * oled.c
+ *
+ *  Created on: Apr 17, 2020
+ *      Author: Morgan
+ */
+
+
 #include "main.h"
 #include "oled.h"
 #include "fonts.h"
-SPI_HandleTypeDef hspi2;
+extern SPI_HandleTypeDef hspi2;
 
-void turnOn(){
+void turnOnScreen(){
+HAL_GPIO_WritePin(GPIOB, oled_NSS_Pin|ole_RES_Pin, GPIO_PIN_SET);
 	uint8_t turnOn[] = {0xA8, 0x3F, 0xD3, 0x00, 0x20,0x10, 0xAF, 0xAC};// 0xAF}; //need to change
 	uint8_t orientation[]={0xC8, 0xA1};
 	 sendCMD(turnOn, (uint16_t)sizeof(turnOn));

@@ -1,10 +1,15 @@
-#ifndef __OLED_H
-#define __OLED_H
+/*
+ * oled.h
+ *
+ *  Created on: Apr 17, 2020
+ *      Author: Morgan
+ */
+
+#ifndef __OLED_H_
+#define __OLED_H_
 //#include "fonts.h"
 //#define contrast 0x81
-#define contrastLow 0x810F
-#define contrastHigh 0x81FF
-	void turnOn();
+	void turnOnScreen();
 	void sendCMD(uint8_t *cmd, uint16_t size);
 	void sendDATA(uint8_t *data, uint16_t size);
 	void sendString(char *string, uint8_t header);

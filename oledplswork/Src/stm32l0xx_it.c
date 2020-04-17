@@ -23,6 +23,7 @@
 #include "stm32l0xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "oled.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -42,11 +43,9 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
-	uint8_t isDim = 0;
+//	uint8_t isDim = 0;
 	uint8_t isSelfSetup = 1;
 	uint8_t isOtherSetup = 1;
-	uint8_t contrastLow[]={0x81, 0x0F};
-	uint8_t contrastHigh[]={0x81, 0xFF};
 	char hr[]="000";
 	char spo2[] = {'0','0','0'};
 	char distance[]="N000";
