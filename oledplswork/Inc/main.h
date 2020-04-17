@@ -63,10 +63,10 @@ void Error_Handler(void);
 #define dim_EXTI_IRQn EXTI0_1_IRQn
 #define oled_NSS_Pin GPIO_PIN_12
 #define oled_NSS_GPIO_Port GPIOB
-#define ole_RES_Pin GPIO_PIN_14
-#define ole_RES_GPIO_Port GPIOB
-#define oled_DC_Pin GPIO_PIN_8
-#define oled_DC_GPIO_Port GPIOA
+#define oled_DC_Pin GPIO_PIN_14
+#define oled_DC_GPIO_Port GPIOB
+#define oled_RES_Pin GPIO_PIN_8
+#define oled_RES_GPIO_Port GPIOA
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
