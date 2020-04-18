@@ -175,69 +175,10 @@ void TIM2_IRQHandler(void)
 	char* message = "                      ";
 
 	if(isSelfSetup){
-		clearScreen();
-		sendCMD(page,(uint16_t)sizeof(page));
 
-		sendCMD(col, (uint16_t)sizeof(col));
-		sendString(message,0x00);
-		col[1]=0x13;
-		col[2]=0x32;
-		message = "@* ";
-
-		sendCMD(page,(uint16_t)sizeof(page));
-
-		sendCMD(col, (uint16_t)sizeof(col));
-		sendString(message,0x00);
-
-		col[1]=0x33;
-		col[2]=0x39;
-		message = "%";
-
-		sendCMD(page,(uint16_t)sizeof(page));
-
-		sendCMD(col, (uint16_t)sizeof(col));
-		sendString(message,0x00);
 		isSelfSetup = 0;
 
-
-	}
-	if(isOtherSetup){
-		// user name
-
-		message = "TOTO ";
-		page[1]=0x02;
-		page[2]=0x02;
-
-		col[1]=0x00;
-		col[2]=0x7F;
-		sendCMD(page,(uint16_t)sizeof(page));
-
-		sendCMD(col, (uint16_t)sizeof(col));
-		sendString(message,0x00);
-
-		page[1]=0x03;
-		page[2]=0x03;
-		col[1]=0x13;
-		col[2]=0x20;
-		message = "@* ";
-		sendCMD(page,(uint16_t)sizeof(page));
-		sendCMD(col, (uint16_t)sizeof(col));
-		sendString(message,0x00);
-		col[1]=0x33;
-		col[2]=0x39;
-		message = "%";
-		sendCMD(page,(uint16_t)sizeof(page));
-		sendCMD(col, (uint16_t)sizeof(col));
-		sendString(message,0x00);
-
-		col[1]=0x5A;
-		col[2]=0x60;
-		message ="M";
-
-		sendCMD(page,(uint16_t)sizeof(page));
-		sendCMD(col, (uint16_t)sizeof(col));
-		sendString(message,0x00);
-		isSelfSetup = 0;
+		setupScreen();
 	}
 	if(hr[2]=='9'){
 		if(hr[1]=='9'){

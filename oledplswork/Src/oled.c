@@ -24,6 +24,49 @@ HAL_GPIO_WritePin(oled_NSS_GPIO_Port, oled_NSS_Pin, GPIO_PIN_SET);
 	  sendDATA(MARSBMP, (uint16_t)sizeof(MARSBMP));
 }
 
+void setupScreen(){
+
+
+	uint8_t page[] = {0x22, 0x00,0x00};
+
+	uint8_t col[]= {0x21, 0x00, 0x7F};
+	clearScreen();
+	sendCMD(page,(uint16_t)sizeof(page));
+
+	sendCMD(col, (uint16_t)sizeof(col));
+	char* message = "   @*@    %          ";
+	sendString(message,0x00);
+	page[1]=0x01;
+	page[2]=0x01;
+	col[1]=0x00;
+	col[2]=0x7F;
+	sendCMD(page,(uint16_t)sizeof(page));
+	sendCMD(col, (uint16_t)sizeof(col));
+	message="                     ";
+	sendString(message,0x01);
+
+
+
+	message = "TOTO ";
+	page[1]=0x02;
+	page[2]=0x02;
+
+	col[1]=0x00;
+	col[2]=0x7F;
+	sendCMD(page,(uint16_t)sizeof(page));
+	sendCMD(col, (uint16_t)sizeof(col));
+	sendString(message,0x00);
+
+	page[1]=0x03;
+	page[2]=0x03;
+	col[1]=0x00;
+	col[2]=0x7F;
+	message = "   @*@    %     @M     ";
+	sendCMD(page,(uint16_t)sizeof(page));
+	sendCMD(col, (uint16_t)sizeof(col));
+	sendString(message,0x00);
+}
+
 void sendCMD(uint8_t *cmd, uint16_t size) {
 	//set dc low
 	HAL_GPIO_WritePin(oled_DC_GPIO_Port,  oled_DC_Pin, GPIO_PIN_RESET);
@@ -130,6 +173,10 @@ void updateScreen(char* hr, char* spo2, char* distance, char* user){
 
 		sendCMD(col, (uint16_t)sizeof(col));
 		sendString(spo2,0x00);
+		col[1]=0x61;
+		col[2]=0x79;
+		sendCMD(col, (uint16_t)sizeof(col));
+		sendString(distance,0x00);
 
 
 	}

@@ -10,6 +10,7 @@
 //#include "fonts.h"
 //#define contrast 0x81
 	void turnOnScreen();
+	void setupScreen();
 	void sendCMD(uint8_t *cmd, uint16_t size);
 	void sendDATA(uint8_t *data, uint16_t size);
 	void sendString(char *string, uint8_t header);
