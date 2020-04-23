@@ -61,7 +61,7 @@ void setupScreen(){
 	page[2]=0x03;
 	col[1]=0x00;
 	col[2]=0x7F;
-	message = "   @*@    %     @M     ";
+	message = "   @*@    %       @M     ";
 	sendCMD(page,(uint16_t)sizeof(page));
 	sendCMD(col, (uint16_t)sizeof(col));
 	sendString(message,0x00);
@@ -194,7 +194,7 @@ void updateScreen(char* hr, char* spo2, char* distance, char* user){
 		sendCMD(col, (uint16_t)sizeof(col));
 		sendString(spo2,0x00);
 		col[1]=0x41;
-		col[2]=0x59;
+		col[2]=0x71;
 		sendCMD(col, (uint16_t)sizeof(col));
 		sendString(distance,0x00);
 	}
